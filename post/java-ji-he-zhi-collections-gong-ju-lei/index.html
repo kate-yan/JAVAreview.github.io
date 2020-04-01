@@ -1,0 +1,330 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>JAVA集合之Collections工具类 | Gridea</title>
+<link rel="shortcut icon" href="https://github.com/kate-yan/JAVAreview.github.io/favicon.ico?v=1585733963128">
+<link href="https://cdn.jsdelivr.net/npm/remixicon@2.3.0/fonts/remixicon.css" rel="stylesheet">
+<link rel="stylesheet" href="https://github.com/kate-yan/JAVAreview.github.io/styles/main.css">
+<link rel="alternate" type="application/atom+xml" title="JAVA集合之Collections工具类 | Gridea - Atom Feed" href="https://github.com/kate-yan/JAVAreview.github.io/atom.xml">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Droid+Serif:400,700">
+
+
+
+    <meta name="description" content="JAVA集合之Collections
+Collections是JAVA中的一个类，是集合的工具类，提供多种方法供集合使用（Set、List、Map）,以下记录几种比较重要的方法。
+1. sort
+  sort可以将List集合中的元素按照元..." />
+    <meta name="keywords" content="" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+    <script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://github.com/kate-yan/JAVAreview.github.io">
+  <img class="avatar" src="https://github.com/kate-yan/JAVAreview.github.io/images/avatar.png?v=1585733963128" alt="">
+  </a>
+  <h1 class="site-title">
+    Gridea
+  </h1>
+  <p class="site-description">
+    温故而知新
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          归档
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              JAVA集合之Collections工具类
+            </h2>
+            <div class="post-info">
+              <span>
+                2020-04-01
+              </span>
+              <span>
+                6 min read
+              </span>
+              
+            </div>
+            
+            <div class="post-content-wrapper">
+              <div class="post-content">
+                <h1 id="java集合之collections">JAVA集合之Collections</h1>
+<p>Collections是JAVA中的一个类，是集合的工具类，提供多种方法供集合使用（Set、List、Map）,以下记录几种比较重要的方法。</p>
+<h3 id="1-sort">1. sort</h3>
+<p>  sort可以将List集合中的元素按照元素的比较顺序从小到大排列:如果集合中存放的是基础类型，则按照自然升序排列；如果集合中是自定义对象，则使用<code>sort()</code>必须继承Comparable接口。<br>
+  注意：这里的<code>sort()</code>排序是稳定的。</p>
+<pre><code class="language-java">//在Collections类中，调用sort()方法时传入或不传入比较器都调用List.sort();方法
+@SuppressWarnings(&quot;unchecked&quot;)
+public static &lt;T extends Comparable&lt;? super T&gt;&gt; void sort(List&lt;T&gt; list) {
+    list.sort(null);//调用List.sort()
+}
+
+@SuppressWarnings({&quot;unchecked&quot;, &quot;rawtypes&quot;})
+public static &lt;T&gt; void sort(List&lt;T&gt; list, Comparator&lt;? super T&gt; c) {
+    list.sort(c);//调用List.sort()
+}
+</code></pre>
+<p>  Collections里使用的<code>sort()</code>的实际上调用了<code>List.sort()</code>, 而<code>List.sort()</code>又调用了<code>Arrays.sort()</code>，那么下面让我们分析一下<code>Arrays.sort()</code>。</p>
+<pre><code class="language-java">//在Arrays类中有许多重载的sort方法，这里显示的是Collections.sort()使用的方法
+//不传入比较器的sort()方法
+public static void sort(Object[] a) {
+    if (LegacyMergeSort.userRequested)
+        legacyMergeSort(a);
+    else
+        ComparableTimSort.sort(a, 0, a.length, null, 0, 0);
+    }
+
+//传入比较器的sort()方法
+public static &lt;T&gt; void sort(T[] a, Comparator&lt;? super T&gt; c) {
+    if (c == null) {
+        sort(a);
+    } else {
+        if (LegacyMergeSort.userRequested)
+            legacyMergeSort(a, c);
+        else
+            TimSort.sort(a, 0, a.length, c, null, 0, 0);
+    }
+}
+
+//调用的归并排序算法，该方法在未来可能会被移除
+private static &lt;T&gt; void legacyMergeSort(T[] a, Comparator&lt;? super T&gt; c) {
+    T[] aux = a.clone();
+    if (c==null)
+        mergeSort(aux, a, 0, a.length, 0);
+    else
+        mergeSort(aux, a, 0, a.length, 0, c);
+}
+
+</code></pre>
+<p>  可以看出如果<code>LegacyMergeSort.userRequested</code>为true的话，将使用归并排序；否则将使用<code>TimSort</code>排序算法。</p>
+<h3 id="2binarysearch">2.binarySearch</h3>
+<p>  使用<code>binarySearch</code>的集合必须已经是递增排序的。通过二分查找法寻找集合中是否存在target值，如果不存在则<strong>返回值=-(target值应该在集合中插入的位置+1)</strong>，存在则返回target在集合中的索引值。如果集合中存在重复元素，只能返回其中某一元素（第一个找到的元素）的下标，<strong>不能返回第一个元素的下标</strong>。</p>
+<pre><code class="language-java">//Collection类下的binarySearch
+public static &lt;T&gt;
+int binarySearch(List&lt;? extends Comparable&lt;? super T&gt;&gt; list, T key) {
+    if (list instanceof RandomAccess || list.size()&lt;BINARYSEARCH_THRESHOLD)
+        //如果集合实现RandomAccess接口或者集合元素小于5000
+        return Collections.indexedBinarySearch(list, key);
+    else
+        return Collections.iteratorBinarySearch(list, key);
+}
+
+private static &lt;T&gt;
+int indexedBinarySearch(List&lt;? extends Comparable&lt;? super T&gt;&gt; list, T key) {
+    int low = 0;
+    int high = list.size()-1;
+
+    while (low &lt;= high) {
+        int mid = (low + high) &gt;&gt;&gt; 1;
+        Comparable&lt;? super T&gt; midVal = list.get(mid);
+        int cmp = midVal.compareTo(key);//使用compareTo进行比较
+
+        if (cmp &lt; 0)
+            low = mid + 1;
+        else if (cmp &gt; 0)
+            high = mid - 1;
+        else
+            return mid; 
+    }
+    return -(low + 1);  // 没找到，返回-（low+1）
+
+}
+
+private static &lt;T&gt;
+int iteratorBinarySearch(List&lt;? extends Comparable&lt;? super T&gt;&gt; list, T key)
+{
+    int low = 0;
+    int high = list.size()-1;
+    //与indexedBinarySearch不同地方：使用集合的迭代器
+    ListIterator&lt;? extends Comparable&lt;? super T&gt;&gt; i = list.listIterator();
+
+    while (low &lt;= high) {
+        int mid = (low + high) &gt;&gt;&gt; 1;
+        Comparable&lt;? super T&gt; midVal = get(i, mid);
+        int cmp = midVal.compareTo(key);
+
+        if (cmp &lt; 0)
+            low = mid + 1;
+        else if (cmp &gt; 0)
+            high = mid - 1;
+        else
+            return mid; 
+    }
+    return -(low + 1);  // 没找到，返回-（low+1）
+}
+</code></pre>
+<h3 id="3shuffle">3.shuffle</h3>
+<p>  <code>shuffle</code>将当前元素随机和前面的一个元素交换，从而得到一个随机化的列表。<br>
+  若输入集合为链表的话，先转换为数组，shuffle后再转为链表。</p>
+<pre><code class="language-java">public static void shuffle(List&lt;?&gt; list) {
+    Random rnd = r;//生成Random类对象
+    if (rnd == null)
+        r = rnd = new Random(); 
+    shuffle(list, rnd);
+
+}
+
+@SuppressWarnings({&quot;rawtypes&quot;, &quot;unchecked&quot;})
+public static void shuffle(List&lt;?&gt; list, Random rnd) {
+    int size = list.size();
+    //如果传入list长度小于5或者list是RandomAccess，直接swap
+    if (size &lt; SHUFFLE_THRESHOLD || list instanceof RandomAccess) {
+        for (int i=size; i&gt;1; i--)
+            swap(list, i-1, rnd.nextInt(i));
+    } else {
+        //将连边转化为Array
+        Object arr[] = list.toArray();
+        // Shuffle array
+        for (int i=size; i&gt;1; i--)
+            swap(arr, i-1, rnd.nextInt(i));
+        //使用List的迭代器将数组转化回链表
+        ListIterator it = list.listIterator();
+        for (int i=0; i&lt;arr.length; i++) {
+            it.next();
+            it.set(arr[i]);
+        }
+    }
+}
+</code></pre>
+<h3 id="5min和max">5.min和max</h3>
+<p>通过过迭代器找最小值，唯一区别的是不同容器实现迭代的方式不同，也是性能影响的地方。</p>
+<pre><code class="language-java">public static &lt;T extends Object &amp; Comparable&lt;? super T&gt;&gt; T min(Collection&lt;? extends T&gt; coll) {
+    Iterator&lt;? extends T&gt; i = coll.iterator();
+    T candidate = i.next();
+    //使用迭代器进行集合元素遍历，两两比较
+    while (i.hasNext()) {
+        T next = i.next();
+        if (next.compareTo(candidate) &lt; 0)
+            candidate = next;
+    }
+    return candidate;
+}
+</code></pre>
+
+              </div>
+              <div class="toc-container">
+                <ul class="markdownIt-TOC">
+<li><a href="#java%E9%9B%86%E5%90%88%E4%B9%8Bcollections">JAVA集合之Collections</a><br>
+*
+<ul>
+<li><a href="#1-sort">1. sort</a></li>
+<li><a href="#2binarysearch">2.binarySearch</a></li>
+<li><a href="#3shuffle">3.shuffle</a></li>
+<li><a href="#5min%E5%92%8Cmax">5.min和max</a></li>
+</ul>
+</li>
+</ul>
+
+              </div>
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://github.com/kate-yan/JAVAreview.github.io/post/hello-gridea/">
+              <h3 class="post-title">
+                Hello Gridea
+              </h3>
+            </a>
+          </div>
+        
+
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a>
+  <a class="rss" href="https://github.com/kate-yan/JAVAreview.github.io/atom.xml" target="_blank">
+    <i class="ri-rss-line"></i> RSS
+  </a>
+</div>
+
+      </div>
+    </div>
+
+    <script>
+      hljs.initHighlightingOnLoad()
+
+      let mainNavLinks = document.querySelectorAll(".markdownIt-TOC a");
+
+      // This should probably be throttled.
+      // Especially because it triggers during smooth scrolling.
+      // https://lodash.com/docs/4.17.10#throttle
+      // You could do like...
+      // window.addEventListener("scroll", () => {
+      //    _.throttle(doThatStuff, 100);
+      // });
+      // Only not doing it here to keep this Pen dependency-free.
+
+      window.addEventListener("scroll", event => {
+        let fromTop = window.scrollY;
+
+        mainNavLinks.forEach((link, index) => {
+          let section = document.getElementById(decodeURI(link.hash).substring(1));
+          let nextSection = null
+          if (mainNavLinks[index + 1]) {
+            nextSection = document.getElementById(decodeURI(mainNavLinks[index + 1].hash).substring(1));
+          }
+          if (section.offsetTop <= fromTop) {
+            if (nextSection) {
+              if (nextSection.offsetTop > fromTop) {
+                link.classList.add("current");
+              } else {
+                link.classList.remove("current");    
+              }
+            } else {
+              link.classList.add("current");
+            }
+          } else {
+            link.classList.remove("current");
+          }
+        });
+      });
+
+    </script>
+  </body>
+</html>
